@@ -11,11 +11,11 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
 
 public class DeliveryCardTest {
     int days;
+    int weeks;
 
     public String dayOfMeeting(int days) {
         LocalDateTime today = LocalDateTime.now().plusDays(days);
@@ -23,6 +23,14 @@ public class DeliveryCardTest {
         String minDate = dateFormat.format(today);
         return minDate;
     }
+    public String availableWeek(int weeks) {
+        LocalDateTime now = LocalDateTime.now().plusWeeks(weeks);
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        String minWeek = dateFormat.format(now);
+        return minWeek;
+    }
+
+
 
     @BeforeEach
     void setUp() {
@@ -86,6 +94,7 @@ public class DeliveryCardTest {
         $(Selectors.withText("Забронировать")).click();
         $("[data-test-id=phone] .input__sub").shouldHave(Condition.exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
     }
+
     @Test
     void shouldNotCheckBox() {
         $("[data-test-id=city] .input__control").setValue("Санкт-Петербург").click();
@@ -94,5 +103,30 @@ public class DeliveryCardTest {
         $("[data-test-id=phone] input").setValue("+79219503030");
         $(Selectors.withText("Забронировать")).click();
         $("[role='presentation']").shouldHave(Condition.exactText("Я соглашаюсь с условиями обработки и использования моих персональных данных"));
+    }
+
+    @Test
+    void shouldTestCityMenu() {
+        $("[data-test-id=city] .input__control").setValue("Са");
+        $$(".menu-item").find(Condition.exactText("Санкт-Петербург")).click();
+        $("[data-test-id=date] [type='tel']").doubleClick().setValue(dayOfMeeting(3));
+        $("[data-test-id=name] [type='text']").setValue("Пылаева Лариса");
+        $("[data-test-id=phone] input").setValue("+79219503030");
+        $("[data-test-id=agreement]").click();
+        $(Selectors.withText("Забронировать")).click();
+        $(".notification__title").shouldBe(Condition.visible, Duration.ofSeconds(15));
+        $(".notification__content").shouldHave(Condition.exactText("Встреча успешно забронирована на " + dayOfMeeting(3)));
+    }
+
+    @Test
+    void shouldTestCalendar() {
+        $("[data-test-id=city] .input__control").setValue("Санкт-Петербург").click();
+        $("[data-test-id=date] [type='tel']").doubleClick().setValue(availableWeek(1));
+        $("[data-test-id=name] [type='text']").setValue("Пылаева Лариса");
+        $("[data-test-id=phone] input").setValue("+79219503030");
+        $("[data-test-id=agreement]").click();
+        $(Selectors.withText("Забронировать")).click();
+        $(".notification__title").shouldBe(Condition.visible, Duration.ofSeconds(15));
+        $(".notification__content").shouldHave(Condition.exactText("Встреча успешно забронирована на " + dayOfMeeting(3)));
     }
 }
