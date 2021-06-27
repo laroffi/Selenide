@@ -121,12 +121,14 @@ public class DeliveryCardTest {
     @Test
     void shouldTestCalendar() {
         $("[data-test-id=city] .input__control").setValue("Санкт-Петербург").click();
-        $("[data-test-id=date] [type='tel']").doubleClick().setValue(availableWeek(1));
+        $(".icon_name_calendar").click();
+        $("[data-step='1']").click();
+        $("[data-day='1625346000000']").click();
         $("[data-test-id=name] [type='text']").setValue("Пылаева Лариса");
         $("[data-test-id=phone] input").setValue("+79219503030");
         $("[data-test-id=agreement]").click();
         $(Selectors.withText("Забронировать")).click();
         $(".notification__title").shouldBe(Condition.visible, Duration.ofSeconds(15));
-        $(".notification__content").shouldHave(Condition.exactText("Встреча успешно забронирована на " + dayOfMeeting(3)));
+        $(".notification__content").shouldHave(Condition.exactText("Встреча успешно забронирована на " + dayOfMeeting(7)));
     }
 }
