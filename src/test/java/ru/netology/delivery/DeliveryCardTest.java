@@ -4,7 +4,6 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 import java.time.Duration;
@@ -15,7 +14,6 @@ import static com.codeborne.selenide.Selenide.*;
 
 public class DeliveryCardTest {
     int days;
-    int weeks;
 
     public String dayOfMeeting(int days) {
         LocalDateTime today = LocalDateTime.now().plusDays(days);
@@ -23,14 +21,12 @@ public class DeliveryCardTest {
         String minDate = dateFormat.format(today);
         return minDate;
     }
-    public String availableWeek(int weeks) {
-        LocalDateTime now = LocalDateTime.now().plusWeeks(weeks);
-        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        String minWeek = dateFormat.format(now);
-        return minWeek;
+    public String dayAfterWeek(int days) {
+        LocalDateTime oggi = LocalDateTime.now().plusDays(days);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd");
+        String weekDate = dtf.format(oggi);
+        return weekDate;
     }
-
-
 
     @BeforeEach
     void setUp() {
@@ -119,16 +115,18 @@ public class DeliveryCardTest {
     }
 
     @Test
-    void shouldTestCalendar() {
+    void shouldAgainTestCalendar() {
         $("[data-test-id=city] .input__control").setValue("Санкт-Петербург").click();
         $(".icon_name_calendar").click();
-        $("[data-step='1']").click();
-        $("[data-day='1625346000000']").click();
+        $$("[role='gridcell']").find(Condition.exactText(dayAfterWeek(7).replaceFirst ("0", ""))).click();
         $("[data-test-id=name] [type='text']").setValue("Пылаева Лариса");
         $("[data-test-id=phone] input").setValue("+79219503030");
         $("[data-test-id=agreement]").click();
         $(Selectors.withText("Забронировать")).click();
         $(".notification__title").shouldBe(Condition.visible, Duration.ofSeconds(15));
         $(".notification__content").shouldHave(Condition.exactText("Встреча успешно забронирована на " + dayOfMeeting(7)));
+
+
+
     }
 }
